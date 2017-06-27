@@ -1,0 +1,87 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "volumes": [
+        {
+            "name": "prometheus-conf",
+            "host": {
+                "sourcePath": "/var/app/current/prometheus"
+            }
+        },
+        {
+            "name": "prometheus-data",
+            "host": {
+                "sourcePath": "/data/prometheus"
+            }
+        },
+        {
+            "name": "prometheus-gateway-data",
+            "host": {
+                "sourcePath": "/data/prometheus_gateway"
+            }
+        }
+    ],
+    "containerDefinitions": [
+        {
+            "name": "prometheus-app",
+            "image": "prom/prometheus",
+            "essential": true,
+            "memory": 1024,
+            "mountPoints": [
+                {
+                    "sourceVolume": "prometheus-conf",
+                    "containerPath": "/opt/prometheus"
+                },
+                {
+                    "sourceVolume": "prometheus-data",
+                    "containerPath": "/data"
+                }
+            ],
+            "command": [
+                "-config.file=/opt/prometheus/prometheus.yml",
+                "-storage.local.path=/data",
+                "-web.console.libraries=/etc/prometheus/console_libraries",
+                "-web.console.templates=/etc/prometheus/consoles"
+            ],
+            "links": [
+                "prometheus-gateway"
+            ]
+        },
+        {
+            "name": "prometheus-gateway",
+            "image": "prom/pushgateway",
+            "essential": true,
+            "memory": 1024,
+            "mountPoints": [
+                {
+                "sourceVolume": "prometheus-gateway-data",
+                "containerPath": "/data"
+                }
+            ],
+            "command": [
+                "-persistence.file",
+                "/data/pushgateway.dat"
+            ],
+            "portMappings": [
+                {
+                "hostPort": 9091,
+                "containerPort": 9091
+                }
+            ]
+        },
+        {
+            "name": "grafana",
+            "image": "grafana/grafana",
+            "essential": true,
+            "memory": 512,
+             "links": [
+                 "prometheus-app"
+             ],
+             "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 3000
+                }
+             ]
+        }
+    ]
+}

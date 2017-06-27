@@ -1,0 +1,31 @@
+version: "2"
+services:
+  prometheus-app:
+    image: prom/prometheus
+    container_name: prometheus-app
+    command:
+      - -config.file=/opt/prometheus/prometheus.yml
+      - -storage.local.path=/data
+      - -web.console.libraries=/etc/prometheus/console_libraries
+      - -web.console.templates=/etc/prometheus/consoles
+    links:
+      - prometheus-gateway
+    ports:
+      - 9090:9090
+    volumes:
+      - /Users/rprakashg/prometheus:/opt/prometheus
+  prometheus-gateway:
+    image: prom/pushgateway
+    container_name: prometheus-gateway  
+    ports:
+      - 9091:9091
+    command:
+      - -persistence.file
+      - /data/pushgateway.dat
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 80:3000
+    links:
+      - prometheus-app

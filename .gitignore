@@ -1,0 +1,4 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk/config.yml
+!.elasticbeanstalk/saved_configs/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
